@@ -7,6 +7,15 @@ int ldr = 0;
 int white_bright = 255;       // default brightness for white (0-255)
 int buzz_disable = 1;         // change to 1 to switch off initial buzzer
 
+int ledPin = 13;
+int pirPin = 12;
+
+// jingle bell variables
+int buzzerPin = 2;
+int tempo = 200;
+char notes[] = "eeeeeeegcde fffffeeeeddedg";
+int duration[] = {1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2};
+
 
 // todo on clean host
 // install CH340G serial chip driver, from wemos
@@ -21,16 +30,16 @@ void setup() {
   FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, BGR, DATA_RATE_MHZ(12)>(leds, NUM_LEDS);
   FastLED.setBrightness(white_bright); // Global Brightness setting max 255 
 
-  pinMode(12, INPUT);         // PIR motion sensor read port 
-  pinMode(2, OUTPUT);         // buzzer port
-  pinMode(13, OUTPUT);        // LED port
+  pinMode(pirPin, INPUT);         // PIR motion sensor read port 
+  pinMode(buzzerPin, OUTPUT);         // buzzer port
+  pinMode(ledPin, OUTPUT);        // LED port
   if (buzz_disable == 0) {
-     digitalWrite(2, HIGH);   // buzzer ON, if not disabled        
+     digitalWrite(buzzerPin, HIGH);   // buzzer ON, if not disabled        
   }
-  digitalWrite(13, HIGH);     // PIR LED ON
+  digitalWrite(ledPin, HIGH);     // PIR LED ON
   delay(1000);
-  digitalWrite(2, LOW);       // buzzer OFF
-  digitalWrite(13, LOW);      // PIR LED OFF
+  digitalWrite(buzzerPin, LOW);       // buzzer OFF
+  digitalWrite(ledPin, LOW);      // PIR LED OFF
 }
 
 void loop() {
@@ -38,25 +47,28 @@ void loop() {
       for(int i=0; i<NUM_LEDS; i++){           // iterate through the RGB LEDs
          leds[i].setRGB(0, 0, 0);              // set default colour or off
       }
-      pir = digitalRead(12);                   // check PIR
+      pir = digitalRead(pirPin);                   // check PIR
       ldr = analogRead(7);                     // read light sensor (0 = very dark, 1023 = very bright)
                                                //      50-150 is usually a suitable threshold
       if (pir == 1){                           // If motion detected
-        digitalWrite(13, HIGH);                // PIR LED ON
+        digitalWrite(ledPin, HIGH);                // PIR LED ON
         delay(100);                            // Delay so when dark the LED will flash on for 0.1s
       }
       else{
-        digitalWrite(13, LOW);                 // PIR LED OFF
+        digitalWrite(ledPin, LOW);                 // PIR LED OFF
       }
       //if (pir == 1 && ldr <= 150 ) {         // if someone there AND dark(ish) no case
       if (pir == 1 && ldr <= 50 ) {            // if someone there AND dark(ish) with case
-        digitalWrite(13, LOW);                 // Don't need PIR LED on now
+      //if (pir == 1){                           // if someone there
+        digitalWrite(ledPin, LOW);                 // Don't need PIR LED on now
         for(int i=0; i<NUM_LEDS; i++){
             leds[i].setRGB(white_bright, white_bright, white_bright);
         }
         FastLED.show();
-        delay(18000);                          // lights on for about 18 seconds
+      //  delay(18000);                          // lights on for about 18 seconds
 
+        playTheTune();
+        
         for(int j=white_bright; j>-1; j--){ 
            for(int i=0; i<NUM_LEDS; i++){
               leds[i].setRGB(j, j, j);         // fading out the white over ~2s
@@ -72,4 +84,34 @@ void loop() {
         FastLED.show();                        // display current LED settings
         delay(500);                            // otherwise poll PIR sensor at 2 Hertz
       }
+}
+
+// https://giacomocerquone.com/blog/jingle-bell-with-an-arduino-and-a-buzzer
+
+void playTheTune() {
+  // Scan each char from "notes"
+  for (int i = 0; i < sizeof(notes)-1; i++) {
+    if (notes[i] == ' ') {
+      // If find a space it rests
+      delay(duration[i] * tempo);
+    } else {
+      playANote(notes[i], duration[i] * tempo);
+    }
+
+    // Pauses between notes
+    delay((tempo*2)*duration[i]);
+  }
+}
+
+void playANote(char note, int duration) {
+  char notesName[] = { 'c', 'd', 'e', 'f', 'g' };
+  int tones[] = { 261, 293, 329, 349, 392 };
+
+  for (int i = 0; i < sizeof(tones); i++) {
+    // Bind the note took from the char array to the array notesName
+    if (note == notesName[i]) {
+      // Bind the notesName to tones
+      tone(buzzerPin, tones[i], duration);
+    }
+  }
 }
