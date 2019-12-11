@@ -61,21 +61,23 @@ void loop() {
       if (pir == 1 && ldr <= 50 ) {            // if someone there AND dark(ish) with case
       //if (pir == 1){                           // if someone there
         digitalWrite(ledPin, LOW);                 // Don't need PIR LED on now
-        for(int i=0; i<NUM_LEDS; i++){
-            leds[i].setRGB(white_bright, white_bright, white_bright);
-        }
-        FastLED.show();
+    
+        //for(int i=0; i<NUM_LEDS; i++){
+     //       leds[i].setRGB(white_bright, white_bright, white_bright);
+     //   }
+        
+      //  FastLED.show();
       //  delay(18000);                          // lights on for about 18 seconds
 
         playTheTune();
         
-        for(int j=white_bright; j>-1; j--){ 
-           for(int i=0; i<NUM_LEDS; i++){
-              leds[i].setRGB(j, j, j);         // fading out the white over ~2s
-           }
-          FastLED.show();
-          delay(10);                           // wait 10ms
-        }
+    //    for(int j=white_bright; j>-1; j--){ 
+    //       for(int i=0; i<NUM_LEDS; i++){
+    //          leds[i].setRGB(j, j, j);         // fading out the white over ~2s
+    //       }
+    //      FastLED.show();
+    //      delay(10);                           // wait 10ms
+    //    }
 
         FastLED.clear();                       // reset LEDs to 0,0,0
         FastLED.show();                        // lights off
@@ -86,9 +88,36 @@ void loop() {
       }
 }
 
+void setLed0() {  
+     leds[0].setRGB(255, 0, 0);
+     leds[1].setRGB(0, 255, 0);
+     leds[2].setRGB(0, 0, 255);
+     leds[3].setRGB(255, 0, 0);
+     leds[4].setRGB(0, 255, 0);
+     leds[5].setRGB(0, 0, 255);
+     leds[6].setRGB(255, 0, 0);
+     leds[7].setRGB(0, 255, 0);
+        
+     FastLED.show();
+}
+
+void setLed1() {  
+     leds[0].setRGB(0, 255, 0);
+     leds[1].setRGB(0, 0, 255);
+     leds[2].setRGB(255, 0, 0);
+     leds[3].setRGB(0, 255, 0);
+     leds[4].setRGB(0, 0, 255);
+     leds[5].setRGB(255, 0, 0);
+     leds[6].setRGB(0, 255, 0);
+     leds[7].setRGB(0, 0, 255);
+        
+     FastLED.show();
+}
+
 // https://giacomocerquone.com/blog/jingle-bell-with-an-arduino-and-a-buzzer
 
 void playTheTune() {
+  bool ledStep = true;
   // Scan each char from "notes"
   for (int i = 0; i < sizeof(notes)-1; i++) {
     if (notes[i] == ' ') {
@@ -96,6 +125,14 @@ void playTheTune() {
       delay(duration[i] * tempo);
     } else {
       playANote(notes[i], duration[i] * tempo);
+      if (ledStep) {
+        ledStep = false;
+        setLed0();
+      }
+      else {
+        ledStep = true;
+        setLed1();
+      }
     }
 
     // Pauses between notes
