@@ -5,13 +5,14 @@
 int pir = 0;
 int ldr = 0;
 int white_bright = 255;       // default brightness for white (0-255)
-int buzz_disable = 0;         // change to 1 to switch off initial buzzer
+int buzz_disable = 1;         // change to 1 to switch off initial buzzer
 
 
 // todo on clean host
 // install CH340G serial chip driver, from wemos
 // Tools > Board > Arduino Nano
 // Tools > Processor > ATmega328P Old Bootloader (if running a recent version of the IDE)
+// watch windows ransomware protection and allow arduino to install libraries if next step fails.
 // install FastLED library - sketch > include library > manage libraries
 
 CRGBArray<NUM_LEDS> leds;
